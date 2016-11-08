@@ -204,6 +204,9 @@ func (d *Driver) SetConfigFromFlags(flags drivers.DriverOptions) error {
 	d.CIDRList = flags.StringSlice("cloudstack-cidr")
 	d.Expunge = flags.Bool("cloudstack-expunge")
 
+	if err := d.setProject(flags.String("cloudstack-project"), flags.String("cloudstack-project-id")); err != nil {
+		return err
+	}
 	if err := d.setZone(flags.String("cloudstack-zone"), flags.String("cloudstack-zone-id")); err != nil {
 		return err
 	}
@@ -220,9 +223,6 @@ func (d *Driver) SetConfigFromFlags(flags drivers.DriverOptions) error {
 		return err
 	}
 	if err := d.setUserData(flags.String("cloudstack-userdata-file")); err != nil {
-		return err
-	}
-	if err := d.setProject(flags.String("cloudstack-project"), flags.String("cloudstack-project-id")); err != nil {
 		return err
 	}
 
@@ -533,9 +533,9 @@ func (d *Driver) setZone(zone string, zoneID string) error {
 	var z *cloudstack.Zone
 	var err error
 	if d.ZoneID != "" {
-		z, _, err = cs.Zone.GetZoneByID(d.ZoneID)
+		z, _, err = cs.Zone.GetZoneByID(d.ZoneID, d.setParams)
 	} else {
-		z, _, err = cs.Zone.GetZoneByName(d.Zone)
+		z, _, err = cs.Zone.GetZoneByName(d.Zone, d.setParams)
 	}
 	if err != nil {
 		return fmt.Errorf("Unable to get zone: %v", err)
@@ -560,18 +560,17 @@ func (d *Driver) setTemplate(templateName string, templateID string) error {
 		return nil
 	}
 
-	if d.ZoneID == "" && d.TemplateID == "" {
-		return fmt.Errorf("Unable to get template id: zone is not set")
+	if d.ZoneID == "" {
+		return fmt.Errorf("Unable to get template: zone is not set")
 	}
 
 	cs := d.getClient()
 	var template *cloudstack.Template
 	var err error
-
-	if d.ZoneID != "" {
-		template, _, err = cs.Template.GetTemplateByID(d.TemplateID, "executable")
+	if d.TemplateID != "" {
+		template, _, err = cs.Template.GetTemplateByID(d.TemplateID, "executable", d.setParams)
 	} else {
-		template, _, err = cs.Template.GetTemplateByName(d.Template, "executable", d.ZoneID)
+		template, _, err = cs.Template.GetTemplateByName(d.Template, "executable", d.ZoneID, d.setParams)
 	}
 	if err != nil {
 		return fmt.Errorf("Unable to get template: %v", err)
@@ -598,9 +597,9 @@ func (d *Driver) setServiceOffering(serviceoffering string, serviceofferingID st
 	var service *cloudstack.ServiceOffering
 	var err error
 	if d.ServiceOfferingID != "" {
-		service, _, err = cs.ServiceOffering.GetServiceOfferingByID(d.ServiceOfferingID)
+		service, _, err = cs.ServiceOffering.GetServiceOfferingByID(d.ServiceOfferingID, d.setParams)
 	} else {
-		service, _, err = cs.ServiceOffering.GetServiceOfferingByName(d.ServiceOffering)
+		service, _, err = cs.ServiceOffering.GetServiceOfferingByName(d.ServiceOffering, d.setParams)
 	}
 	if err != nil {
 		return fmt.Errorf("Unable to get service offering: %v", err)
@@ -627,9 +626,9 @@ func (d *Driver) setNetwork(networkName string, networkID string) error {
 	var network *cloudstack.Network
 	var err error
 	if d.NetworkID != "" {
-		network, _, err = cs.Network.GetNetworkByID(d.NetworkID)
+		network, _, err = cs.Network.GetNetworkByID(d.NetworkID, d.setParams)
 	} else {
-		network, _, err = cs.Network.GetNetworkByName(d.Network)
+		network, _, err = cs.Network.GetNetworkByName(d.Network, d.setParams)
 	}
 	if err != nil {
 		return fmt.Errorf("Unable to get network: %v", err)
@@ -992,6 +991,20 @@ func (d *Driver) deleteSecurityGroup() error {
 	}
 	if _, err := cs.SecurityGroup.DeleteSecurityGroup(p); err != nil {
 		return err
+	}
+	return nil
+}
+
+func (d *Driver) setParams(c *cloudstack.CloudStackClient, p interface{}) error {
+	if o, ok := p.(interface {
+		SetProjectid(string)
+	}); ok && d.ProjectID != "" {
+		o.SetProjectid(d.ProjectID)
+	}
+	if o, ok := p.(interface {
+		SetZoneid(string)
+	}); ok && d.ZoneID != "" {
+		o.SetZoneid(d.ZoneID)
 	}
 	return nil
 }
