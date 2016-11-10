@@ -291,7 +291,7 @@ func (d *Driver) GetIP() (string, error) {
 // GetState returns the state that the host is in (running, stopped, etc)
 func (d *Driver) GetState() (state.State, error) {
 	cs := d.getClient()
-	vm, count, err := cs.VirtualMachine.GetVirtualMachineByID(d.Id)
+	vm, count, err := cs.VirtualMachine.GetVirtualMachineByID(d.Id, d.setParams)
 	if err != nil {
 		return state.Error, err
 	}
