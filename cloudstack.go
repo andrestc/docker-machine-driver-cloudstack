@@ -59,6 +59,7 @@ type Driver struct {
 	UserData             string
 	Project              string
 	ProjectID            string
+	Tags                 []string
 }
 
 // GetCreateFlags registers the flags this driver adds to
@@ -160,6 +161,10 @@ func (d *Driver) GetCreateFlags() []mcnflag.Flag {
 			Name:  "cloudstack-project-id",
 			Usage: "CloudStack project id",
 		},
+		mcnflag.StringSliceFlag{
+			Name:  "cloudstack-resource-tag",
+			Usage: "key:value resource tags to be created",
+		},
 	}
 }
 
@@ -203,6 +208,7 @@ func (d *Driver) SetConfigFromFlags(flags drivers.DriverOptions) error {
 	d.SSHUser = flags.String("cloudstack-ssh-user")
 	d.CIDRList = flags.StringSlice("cloudstack-cidr")
 	d.Expunge = flags.Bool("cloudstack-expunge")
+	d.Tags = flags.StringSlice("cloudstack-resource-tag")
 
 	if err := d.setProject(flags.String("cloudstack-project"), flags.String("cloudstack-project-id")); err != nil {
 		return err
@@ -400,6 +406,12 @@ func (d *Driver) Create() error {
 			if err := d.enableStaticNat(); err != nil {
 				return err
 			}
+		}
+	}
+
+	if len(d.Tags) > 0 {
+		if err := d.createTags(); err != nil {
+			return err
 		}
 	}
 
@@ -993,6 +1005,19 @@ func (d *Driver) deleteSecurityGroup() error {
 		return err
 	}
 	return nil
+}
+
+func (d *Driver) createTags() error {
+	log.Info("Creating resource tags ...")
+	cs := d.getClient()
+	tags := make(map[string]string)
+	for _, t := range d.Tags {
+		parts := strings.SplitN(t, ":", 2)
+		tags[parts[0]] = parts[1]
+	}
+	params := cs.Resourcetags.NewCreateTagsParams([]string{d.Id}, "UserVm", tags)
+	_, err := cs.Resourcetags.CreateTags(params)
+	return err
 }
 
 func (d *Driver) setParams(c *cloudstack.CloudStackClient, p interface{}) error {
