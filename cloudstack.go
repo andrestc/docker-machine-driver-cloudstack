@@ -15,9 +15,10 @@ import (
 )
 
 const (
-	driverName = "cloudstack"
-	dockerPort = 2376
-	swarmPort  = 3376
+	driverName   = "cloudstack"
+	dockerPort   = 2376
+	swarmPort    = 3376
+	diskDatadisk = "DATADISK"
 )
 
 type configError struct {
@@ -50,6 +51,7 @@ type Driver struct {
 	TemplateID           string
 	ServiceOffering      string
 	ServiceOfferingID    string
+	DeleteVolumes        bool
 	DiskOffering         string
 	DiskOfferingID       string
 	Network              string
@@ -175,6 +177,10 @@ func (d *Driver) GetCreateFlags() []mcnflag.Flag {
 			Name:  "cloudstack-disk-offering-id",
 			Usage: "Cloudstack disk offering id",
 		},
+		mcnflag.BoolFlag{
+			Name:  "cloudstack-delete-volumes",
+			Usage: "Whether or not to delete data volumes associated with the machine upon removal",
+		},
 	}
 }
 
@@ -219,6 +225,7 @@ func (d *Driver) SetConfigFromFlags(flags drivers.DriverOptions) error {
 	d.CIDRList = flags.StringSlice("cloudstack-cidr")
 	d.Expunge = flags.Bool("cloudstack-expunge")
 	d.Tags = flags.StringSlice("cloudstack-resource-tag")
+	d.DeleteVolumes = flags.Bool("cloudstack-delete-volumes")
 
 	if err := d.setProject(flags.String("cloudstack-project"), flags.String("cloudstack-project-id")); err != nil {
 		return err
@@ -461,6 +468,12 @@ func (d *Driver) Remove() error {
 
 	if err := d.deleteKeyPair(); err != nil {
 		return err
+	}
+
+	if d.DeleteVolumes {
+		if err := d.deleteVolumes(); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -850,6 +863,38 @@ func (d *Driver) deleteKeyPair() error {
 	}
 	if _, err := cs.SSH.DeleteSSHKeyPair(p); err != nil {
 		return err
+	}
+	return nil
+}
+
+func (d *Driver) deleteVolumes() error {
+	cs := d.getClient()
+
+	log.Info("Deleting volumes...")
+
+	p := cs.Volume.NewListVolumesParams()
+	p.SetVirtualmachineid(d.Id)
+	if d.ProjectID != "" {
+		p.SetProjectid(d.ProjectID)
+	}
+	volResponse, err := cs.Volume.ListVolumes(p)
+	if err != nil {
+		return err
+	}
+	for _, v := range volResponse.Volumes {
+		if v.Type != diskDatadisk {
+			continue
+		}
+		p := cs.Volume.NewDetachVolumeParams()
+		p.SetId(v.Id)
+		_, err := cs.Volume.DetachVolume(p)
+		if err != nil {
+			return err
+		}
+		_, err = cs.Volume.DeleteVolume(cs.Volume.NewDeleteVolumeParams(v.Id))
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
