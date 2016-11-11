@@ -40,8 +40,4 @@ docker-machine create -d cloudstack \
 
 ## Acknowledgement
 
-The driver is originally written by [@svanharmelen](https://github.com/svanharmelen).
-
-## Author
-
-Atushi Sasaki([@atsaki](https://github.com/atsaki))
+The driver is originally written by [@svanharmelen](https://github.com/svanharmelen) and [@atsaki](https://github.com/atsaki).
