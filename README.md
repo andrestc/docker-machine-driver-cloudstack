@@ -1,7 +1,5 @@
 # Docker Machine CloudStack Driver
 
-[![Circle CI](https://circleci.com/gh/atsaki/docker-machine-driver-cloudstack.svg?style=svg)](https://circleci.com/gh/atsaki/docker-machine-driver-cloudstack)
-
 Docker Machine CloudStack Driver is a driver for [Docker Machine](https://docs.docker.com/machine/).
 It allows to create Docker hosts on [Apache CloudStack](https://cloudstack.apache.org/) and
 [Accelerite CloudPlatform](http://cloudplatform.accelerite.com/).
@@ -14,16 +12,8 @@ It allows to create Docker hosts on [Apache CloudStack](https://cloudstack.apach
 
 Download the binary from follwing link and put it within your PATH (ex. `/usr/local/bin`)
 
-https://github.com/atsaki/docker-machine-driver-cloudstack/releases/latest
+https://github.com/andrestc/docker-machine-driver-cloudstack/releases/latest
 
-### Homebrew
-
-OSX User can use [Homebrew](http://brew.sh/).
-
-```bash
-brew tap atsaki/docker-machine-driver-cloudstack
-brew install docker-machine-driver-cloudstack
-```
 ## Usage
 
 ```bash
