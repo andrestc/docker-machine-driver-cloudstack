@@ -50,6 +50,8 @@ type Driver struct {
 	TemplateID           string
 	ServiceOffering      string
 	ServiceOfferingID    string
+	DiskOffering         string
+	DiskOfferingID       string
 	Network              string
 	NetworkID            string
 	Zone                 string
@@ -165,6 +167,14 @@ func (d *Driver) GetCreateFlags() []mcnflag.Flag {
 			Name:  "cloudstack-resource-tag",
 			Usage: "key:value resource tags to be created",
 		},
+		mcnflag.StringFlag{
+			Name:  "cloudstack-disk-offering",
+			Usage: "Cloudstack disk offering",
+		},
+		mcnflag.StringFlag{
+			Name:  "cloudstack-disk-offering-id",
+			Usage: "Cloudstack disk offering id",
+		},
 	}
 }
 
@@ -229,6 +239,9 @@ func (d *Driver) SetConfigFromFlags(flags drivers.DriverOptions) error {
 		return err
 	}
 	if err := d.setUserData(flags.String("cloudstack-userdata-file")); err != nil {
+		return err
+	}
+	if err := d.setDiskOffering(flags.String("cloudstack-disk-offering"), flags.String("cloudstack-disk-offering-id")); err != nil {
 		return err
 	}
 
@@ -364,6 +377,10 @@ func (d *Driver) Create() error {
 
 	if d.ProjectID != "" {
 		p.SetProjectid(d.ProjectID)
+	}
+
+	if d.DiskOfferingID != "" {
+		p.SetDiskofferingid(d.DiskOfferingID)
 	}
 
 	if d.NetworkType == "Basic" {
@@ -622,6 +639,35 @@ func (d *Driver) setServiceOffering(serviceoffering string, serviceofferingID st
 
 	log.Debugf("service offering id: %q", d.ServiceOfferingID)
 	log.Debugf("service offering name: %q", d.ServiceOffering)
+
+	return nil
+}
+
+func (d *Driver) setDiskOffering(diskOffering string, diskOfferingID string) error {
+	d.DiskOffering = diskOffering
+	d.DiskOfferingID = diskOfferingID
+
+	if d.DiskOffering == "" && d.DiskOfferingID == "" {
+		return nil
+	}
+
+	cs := d.getClient()
+	var disk *cloudstack.DiskOffering
+	var err error
+	if d.DiskOfferingID != "" {
+		disk, _, err = cs.DiskOffering.GetDiskOfferingByID(d.DiskOfferingID, d.setParams)
+	} else {
+		disk, _, err = cs.DiskOffering.GetDiskOfferingByName(d.DiskOffering, d.setParams)
+	}
+	if err != nil {
+		return fmt.Errorf("Unable to get disk offering: %v", err)
+	}
+
+	d.DiskOfferingID = disk.Id
+	d.DiskOffering = disk.Name
+
+	log.Debugf("disk offering id: %q", d.DiskOfferingID)
+	log.Debugf("disk offering name: %q", d.DiskOffering)
 
 	return nil
 }
