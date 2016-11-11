@@ -1,6 +1,6 @@
 .PHONY: build test release clean
 
-GITHUB_USER := atsaki
+GITHUB_USER := andrestc
 VERSION := $(shell grep -w Version version.go | awk '{print $$5}' | sed 's/"//g')
 
 TARGET_OS ?= darwin linux windows
@@ -51,4 +51,3 @@ release: clean build
 		--replace \
 		$(VERSION) dist/
 endif
-
