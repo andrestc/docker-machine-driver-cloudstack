@@ -395,7 +395,7 @@ func (d *Driver) Create() error {
 			p.SetSize(int64(d.DiskSize))
 		}
 	}
-	if d.RootDiskSize != "" {
+	if d.RootDiskSize != 0 {
 		p.SetRootdisksize(d.RootDiskSize)
 	}
 	if d.NetworkType == "Basic" {
