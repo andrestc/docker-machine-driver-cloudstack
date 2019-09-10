@@ -2,31 +2,111 @@
 
 
 [[projects]]
+  branch = "master"
+  digest = "1:6978a38432a017763a148afbc7ce6491734b54292af7d3e969d84d2e9dd242e2"
+  name = "github.com/Azure/go-ansiterm"
+  packages = [
+    ".",
+    "winterm",
+  ]
+  pruneopts = ""
+  revision = "d6e3b3328b783f23731bc4d058875b0371ff8109"
+
+[[projects]]
+  branch = "master"
+  digest = "1:81c1ef97378c6bcfc0b3049fc95b487802e5084f39d23f68fc378db2f554901c"
   name = "github.com/docker/docker"
-  packages = ["pkg/term"]
-  revision = "a8a31eff10544860d2188dddabdee4d727545796"
-  version = "v1.5.0"
+  packages = [
+    "pkg/term",
+    "pkg/term/windows",
+  ]
+  pruneopts = ""
+  revision = "a3ca7b29aa96bd5736cac5eb612e3db016107fd0"
 
 [[projects]]
+  digest = "1:9fe25c9fe60acfa94bafa1807a8c51fa043f38e87053bc0d7e98c3c0e2422080"
   name = "github.com/docker/machine"
-  packages = ["libmachine/drivers","libmachine/drivers/plugin","libmachine/drivers/plugin/localbinary","libmachine/drivers/rpc","libmachine/log","libmachine/mcnflag","libmachine/mcnutils","libmachine/ssh","libmachine/state","libmachine/version","version"]
-  revision = "a650a404fc3e006fea17b12615266168db79c776"
-  version = "v0.7.0"
+  packages = [
+    "libmachine/drivers",
+    "libmachine/drivers/plugin",
+    "libmachine/drivers/plugin/localbinary",
+    "libmachine/drivers/rpc",
+    "libmachine/log",
+    "libmachine/mcnflag",
+    "libmachine/mcnutils",
+    "libmachine/ssh",
+    "libmachine/state",
+    "libmachine/version",
+    "version",
+  ]
+  pruneopts = ""
+  revision = "bd45ab13d88c32a3dd701485983354514abc41fa"
+  version = "v0.16.2"
 
 [[projects]]
+  digest = "1:0f51cee70b0d254dbc93c22666ea2abf211af81c1701a96d04e2284b408621db"
+  name = "github.com/konsorten/go-windows-terminal-sequences"
+  packages = ["."]
+  pruneopts = ""
+  revision = "f55edac94c9bbba5d6182a4be46d86a2c9b5b50e"
+  version = "v1.0.2"
+
+[[projects]]
+  digest = "1:1a405cddcf3368445051fb70ab465ae99da56ad7be8d8ca7fc52159d1c2d873c"
+  name = "github.com/sirupsen/logrus"
+  packages = ["."]
+  pruneopts = ""
+  revision = "839c75faf7f98a33d445d181f3018b5c3409a45e"
+  version = "v1.4.2"
+
+[[projects]]
+  digest = "1:8d44ea8031f34e873915ba6bd0c3b48c8b11864dbf2b077eb0b034677c4f645f"
   name = "github.com/xanzy/go-cloudstack"
   packages = ["cloudstack"]
-  revision = "deca6e17c056012b540aa2d2eae3ea1e63203b85"
-  version = "v2.1.6"
+  pruneopts = ""
+  revision = "ea9e2fe8176a3e6dfe0b6262d93d8433fe829d17"
+  version = "v2.7.0"
 
 [[projects]]
+  branch = "master"
+  digest = "1:c3b737126c08fa82da30169dff76cee24db554013cd051e9cc888dcc079292e6"
   name = "golang.org/x/crypto"
-  packages = ["curve25519","ssh","ssh/terminal"]
-  revision = "beef0f4390813b96e8e68fd78570396d0f4751fc"
+  packages = [
+    "curve25519",
+    "ed25519",
+    "ed25519/internal/edwards25519",
+    "internal/chacha20",
+    "internal/subtle",
+    "poly1305",
+    "ssh",
+    "ssh/terminal",
+  ]
+  pruneopts = ""
+  revision = "094676da4a83be5288d281081bba63a173ce6772"
+
+[[projects]]
+  branch = "master"
+  digest = "1:7340151bcf028f4deae54d53a3ab97840214b4b5dabaf1be7c9e16fae9c714ff"
+  name = "golang.org/x/sys"
+  packages = [
+    "cpu",
+    "unix",
+    "windows",
+  ]
+  pruneopts = ""
+  revision = "bbd175535a8b9969bb0b33f1502f681ee0b122bd"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "2284c20701ae15f7bd01a2cf287f2d4b429fc3bdada108bdbb019b245dca1693"
+  input-imports = [
+    "github.com/docker/machine/libmachine/drivers",
+    "github.com/docker/machine/libmachine/drivers/plugin",
+    "github.com/docker/machine/libmachine/log",
+    "github.com/docker/machine/libmachine/mcnflag",
+    "github.com/docker/machine/libmachine/ssh",
+    "github.com/docker/machine/libmachine/state",
+    "github.com/xanzy/go-cloudstack/cloudstack",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/andrestc/docker-machine-driver-cloudstack"
 	"github.com/docker/machine/libmachine/drivers/plugin"
+	"github.com/tuxmonteiro/docker-machine-driver-cloudstack"
 )
 
 func main() {
