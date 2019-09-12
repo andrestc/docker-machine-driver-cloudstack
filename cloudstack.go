@@ -58,6 +58,7 @@ type Driver struct {
 	RootDiskSize         int64
 	Network              string
 	NetworkID            string
+	NetworkInterface     int
 	Zone                 string
 	ZoneID               string
 	NetworkType          string
@@ -147,6 +148,11 @@ func (d *Driver) GetCreateFlags() []mcnflag.Flag {
 		mcnflag.StringFlag{
 			Name:  "cloudstack-network-id",
 			Usage: "CloudStack network id",
+		},
+		mcnflag.IntFlag{
+			Name:  "cloudstack-network-interface",
+			Usage: "CloudStack network interface (force interface to get ip address)",
+			Value: 0,
 		},
 		mcnflag.StringFlag{
 			Name:  "cloudstack-zone",
@@ -246,6 +252,7 @@ func (d *Driver) SetConfigFromFlags(flags drivers.DriverOptions) error {
 	d.DisplayName = flags.String("cloudstack-displayname")
 	d.SwarmMaster = flags.Bool("swarm-master")
 	d.SwarmDiscovery = flags.String("swarm-discovery")
+	d.NetworkInterface = flags.Int("cloudstack-network-interface")
 	if err := d.setProject(flags.String("cloudstack-project"), flags.String("cloudstack-project-id")); err != nil {
 		return err
 	}
@@ -410,10 +417,11 @@ func (d *Driver) Create() error {
 		return err
 	}
 	d.Id = vm.Id
-	d.PrivateIP = vm.Nic[0].Ipaddress
+	d.PrivateIP = vm.Nic[d.NetworkInterface].Ipaddress
 	if d.NetworkType == "Basic" {
 		d.PublicIP = d.PrivateIP
 	}
+	d.IPAddress = map[bool]string{true: d.PrivateIP, false: d.PublicIP}[d.UsePrivateIP]
 	if d.NetworkType == "Advanced" && !d.UsePrivateIP {
 		if d.PublicIPID == "" {
 			if err := d.associatePublicIP(); err != nil {
@@ -908,6 +916,7 @@ func (d *Driver) associatePublicIP() error {
 		return err
 	}
 	d.PublicIP = ip.Ipaddress
+	d.IPAddress = d.PublicIP
 	d.PublicIPID = ip.Id
 	d.DisassociatePublicIP = true
 
