@@ -161,6 +161,10 @@ func (d *Driver) GetCreateFlags() []mcnflag.Flag {
 			Usage: "CloudStack Userdata file",
 		},
 		mcnflag.StringFlag{
+			Name:  "cloudstack-userdata-base64",
+			Usage: "CloudStack Userdata Base64",
+		},
+		mcnflag.StringFlag{
 			Name:  "cloudstack-project",
 			Usage: "CloudStack project",
 		},
@@ -264,7 +268,7 @@ func (d *Driver) SetConfigFromFlags(flags drivers.DriverOptions) error {
 	if err := d.setPublicIP(flags.String("cloudstack-public-ip")); err != nil {
 		return err
 	}
-	if err := d.setUserData(flags.String("cloudstack-userdata-file")); err != nil {
+	if err := d.setUserData(flags.String("cloudstack-userdata-file"), flags.String("cloudstack-userdata-base64")); err != nil {
 		return err
 	}
 	if err := d.setDiskOffering(flags.String("cloudstack-disk-offering"), flags.String("cloudstack-disk-offering-id")); err != nil {
@@ -733,8 +737,9 @@ func (d *Driver) setPublicIP(publicip string) error {
 	return nil
 }
 
-func (d *Driver) setUserData(userDataFile string) error {
+func (d *Driver) setUserData(userDataFile string, userDataBase64 string) error {
 	d.UserDataFile = userDataFile
+	d.UserData = userDataBase64
 
 	if d.UserDataFile == "" {
 		return nil
