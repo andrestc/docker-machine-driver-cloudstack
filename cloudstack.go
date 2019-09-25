@@ -65,6 +65,8 @@ type Driver struct {
 	UserData             string
 	Project              string
 	ProjectID            string
+	Domain               string
+	DomainID             string
 	Tags                 []string
 	DisplayName          string
 }
@@ -172,6 +174,14 @@ func (d *Driver) GetCreateFlags() []mcnflag.Flag {
 			Name:  "cloudstack-project-id",
 			Usage: "CloudStack project id",
 		},
+		mcnflag.StringFlag{
+			Name:  "cloudstack-domain",
+			Usage: "CloudStack domain",
+		},
+		mcnflag.StringFlag{
+			Name:  "cloudstack-domain-id",
+			Usage: "CloudStack domain id",
+		},
 		mcnflag.StringSliceFlag{
 			Name:  "cloudstack-resource-tag",
 			Usage: "key:value resource tags to be created",
@@ -251,6 +261,9 @@ func (d *Driver) SetConfigFromFlags(flags drivers.DriverOptions) error {
 	d.SwarmMaster = flags.Bool("swarm-master")
 	d.SwarmDiscovery = flags.String("swarm-discovery")
 	if err := d.setProject(flags.String("cloudstack-project"), flags.String("cloudstack-project-id")); err != nil {
+		return err
+	}
+	if err := d.setDomain(flags.String("cloudstack-domain"), flags.String("cloudstack-domain-id")); err != nil {
 		return err
 	}
 	if err := d.setZone(flags.String("cloudstack-zone"), flags.String("cloudstack-zone-id")); err != nil {
@@ -780,6 +793,35 @@ func (d *Driver) setProject(projectName string, projectID string) error {
 
 	log.Debugf("project id: %s", d.ProjectID)
 	log.Debugf("project name: %s", d.Project)
+
+	return nil
+}
+
+func (d *Driver) setDomain(domainName string, domainID string) error {
+	d.Domain = domainName
+	d.DomainID = domainID
+
+	if d.Domain == "" && d.DomainID == "" {
+		return nil
+	}
+
+	cs := d.getClient()
+	var domain *cloudstack.Domain
+	var err error
+	if d.DomainID != "" {
+		domain, _, err = cs.Domain.GetDomainByID(d.DomainID)
+	} else {
+		domain, _, err = cs.Domain.GetDomainByName(d.Domain)
+	}
+	if err != nil {
+		return fmt.Errorf("Invalid domain: %s", err)
+	}
+
+	d.DomainID = domain.Id
+	d.Domain = domain.Name
+
+	log.Debugf("domain id: %s", d.DomainID)
+	log.Debugf("domain name: %s", d.Domain)
 
 	return nil
 }
