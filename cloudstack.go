@@ -445,6 +445,7 @@ func (d *Driver) Create() error {
 	for _, nic := range vm.Nic {
 		if nic.Networkid == d.NetworkID[d.PrivateInterfaceIndex] {
 			d.PrivateIP = nic.Ipaddress
+			break
 		}
 	}
 	if d.NetworkType == "Basic" {
