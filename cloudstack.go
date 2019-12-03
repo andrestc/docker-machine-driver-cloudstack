@@ -442,7 +442,12 @@ func (d *Driver) Create() error {
 	if d.PrivateInterfaceIndex >= len(d.NetworkID) {
 		return fmt.Errorf("Private interface index out of bound for network id list")
 	}
-	d.PrivateIP = vm.Nic[d.PrivateInterfaceIndex].Ipaddress
+	for _, nic := range vm.Nic {
+		if nic.Networkid == d.NetworkID[d.PrivateInterfaceIndex] {
+			d.PrivateIP = nic.Ipaddress
+			break
+		}
+	}
 	if d.NetworkType == "Basic" {
 		d.PublicIP = d.PrivateIP
 	}
