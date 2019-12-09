@@ -729,8 +729,6 @@ func (d *Driver) setNetwork(networkName string, networkID string) error {
 
 	if networkID != "" {
 		networkIDs := strings.Split(networkID, ",")
-		networkIDsResult = make([]string, len(networkIDs))
-		networkNamesResult = make([]string, len(networkIDs))
 		for _, value := range networkIDs {
 			network, _, err = cs.Network.GetNetworkByID(value, d.setParams)
 			if err != nil {
@@ -741,8 +739,6 @@ func (d *Driver) setNetwork(networkName string, networkID string) error {
 		}
 	} else {
 		networkNames := strings.Split(networkName, ",")
-		networkIDsResult = make([]string, len(networkNames))
-		networkNamesResult = make([]string, len(networkNames))
 		for _, value := range networkNames {
 			network, _, err = cs.Network.GetNetworkByName(value, d.setParams)
 			if err != nil {
