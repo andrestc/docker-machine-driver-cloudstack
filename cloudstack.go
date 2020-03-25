@@ -151,7 +151,7 @@ func (d *Driver) GetCreateFlags() []mcnflag.Flag {
 		},
 		mcnflag.IntFlag{
 			Name:  "cloudstack-network-interface",
-			Usage: "CloudStack network interface (force interface to get ip address)",
+			Usage: "CloudStack network interface index",
 			Value: 0,
 		},
 		mcnflag.StringFlag{
@@ -421,7 +421,10 @@ func (d *Driver) Create() error {
 	if d.NetworkType == "Basic" {
 		d.PublicIP = d.PrivateIP
 	}
-	d.IPAddress = map[bool]string{true: d.PrivateIP, false: d.PublicIP}[d.UsePrivateIP]
+	d.IPAddress = d.PublicIP
+	if d.UsePrivateIP {
+		d.IPAddress = d.PrivateIP
+	}
 	if d.NetworkType == "Advanced" && !d.UsePrivateIP {
 		if d.PublicIPID == "" {
 			if err := d.associatePublicIP(); err != nil {
