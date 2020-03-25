@@ -451,6 +451,7 @@ func (d *Driver) Create() error {
 	if d.NetworkType == "Basic" {
 		d.PublicIP = d.PrivateIP
 	}
+	d.IPAddress = map[bool]string{true: d.PrivateIP, false: d.PublicIP}[d.UsePrivateIP]
 	if d.NetworkType == "Advanced" && !d.UsePrivateIP {
 		if d.PublicIPID == "" {
 			if err := d.associatePublicIP(); err != nil {
@@ -992,6 +993,7 @@ func (d *Driver) associatePublicIP() error {
 		return err
 	}
 	d.PublicIP = ip.Ipaddress
+	d.IPAddress = d.PublicIP
 	d.PublicIPID = ip.Id
 	d.DisassociatePublicIP = true
 
